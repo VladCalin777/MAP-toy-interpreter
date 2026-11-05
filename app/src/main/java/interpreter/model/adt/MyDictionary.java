@@ -23,5 +23,15 @@ public class MyDictionary<K,V> implements IDictionary<K,V> {
         map.put(key,value);
     }
     @Override
-    public void update(K key,V value)
+    public void update(K key,V value) throws ADTException {
+        if(!map.containsKey(key)){
+            throw  new ADTException("variabila"+ key + " nu este definita");
+        }
+        map.put(key,value);
+    }
+
+    @Override
+    public String toString() {
+        return map.toString();
+    }
 }
