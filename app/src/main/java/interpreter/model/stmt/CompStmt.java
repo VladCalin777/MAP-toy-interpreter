@@ -16,3 +16,4 @@ public record CompStmt(IStmt first, IStmt second) implements IStmt {
         return "(" + first + "; " + second + ")";
     }
 }
+//desparte si pune pe stiva invers pentru LIFO
