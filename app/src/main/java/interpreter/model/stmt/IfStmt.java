@@ -12,7 +12,7 @@ public record IfStmt(IExp cond, IStmt thenS, IStmt elseS) implements IStmt {
     public PrgState execute(PrgState state) throws MyException {
         IValue val = cond.eval(state.getSymTable());
         if (!(val instanceof BoolValue(boolean b))) {
-            throw new StatementException("conditional expression is not a boolean");
+            throw new StatementException("expresia conditionala nu e de tipul bool");
         }
         if (b) {
             state.getExeStack().push(thenS);

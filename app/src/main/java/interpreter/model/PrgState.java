@@ -34,7 +34,7 @@ public class PrgState {
 
     @Override
     public String toString() {
-        return "-----------------------------------\n" +
+        return
                 "ExeStack:\n" + exeStack + "\n" +
                 "SymTable:\n" + symTable + "\n" +
                 "Out:\n" + out + "\n";

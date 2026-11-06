@@ -11,12 +11,12 @@ public record LogicExp(LogicOp op, IExp left, IExp right) implements IExp {
     public IValue eval(IDictionary<String, IValue> symTable) throws MyException {
         IValue v1 = left.eval(symTable);
         if (!(v1 instanceof BoolValue(boolean b1))) {
-            throw new ExpressionException("first operand is not a boolean");
+            throw new ExpressionException("primul operand nu e de tipul bool");
         }
 
         IValue v2 = right.eval(symTable);
         if (!(v2 instanceof BoolValue(boolean b2))) {
-            throw new ExpressionException("second operand is not a boolean");
+            throw new ExpressionException("al doilea operand nu e de tipul bool");
         }
 
         return switch (op) {

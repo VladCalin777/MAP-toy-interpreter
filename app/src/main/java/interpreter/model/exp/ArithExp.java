@@ -11,12 +11,12 @@ public record ArithExp(ArithOP op, IExp left, IExp right) implements IExp {
     public IValue eval(IDictionary<String, IValue> symTable) throws MyException {
         IValue v1 = left.eval(symTable);
         if (!(v1 instanceof IntValue(int n1))) {
-            throw new ExpressionException("first operand is not an integer");
+            throw new ExpressionException("primul operand nu e de forma int");
         }
 
         IValue v2 = right.eval(symTable);
         if (!(v2 instanceof IntValue(int n2))) {
-            throw new ExpressionException("second operand is not an integer");
+            throw new ExpressionException("al doilea operand nu e de forma int");
         }
 
         return switch (op) {
@@ -25,7 +25,7 @@ public record ArithExp(ArithOP op, IExp left, IExp right) implements IExp {
             case MUL -> new IntValue(n1 * n2);
             case DIV -> {
                 if (n2 == 0) {
-                    throw new ExpressionException("division by zero");
+                    throw new ExpressionException("impartire la 0");
                 }
                 yield new IntValue(n1 / n2);
             }
