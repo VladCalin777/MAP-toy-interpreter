@@ -16,7 +16,7 @@ class StmtTest {
 
     @Test
     void testVarDeclStmt() throws MyException {
-        PrgState state = new PrgState(new MyStack<>(), new MyDictionary<>(), new Mylist<>(), new NopStmt());
+        PrgState state = PrgState.of(new NopStmt());
         IStmt stmt = new VarDeclStmt("v", new IntType());
 
         stmt.execute(state);
@@ -27,7 +27,7 @@ class StmtTest {
 
     @Test
     void testAssignStmt() throws MyException {
-        PrgState state = new PrgState(new MyStack<>(), new MyDictionary<>(), new Mylist<>(), new NopStmt());
+        PrgState state = PrgState.of(new NopStmt());
         state.getSymTable().put("v", new IntValue(0));
 
         IStmt stmt = new AssignStmt("v", new ValueExp(new IntValue(5)));
@@ -38,7 +38,7 @@ class StmtTest {
 
     @Test
     void testPrintStmt() throws MyException {
-        PrgState state = new PrgState(new MyStack<>(), new MyDictionary<>(), new Mylist<>(), new NopStmt());
+        PrgState state = PrgState.of(new NopStmt());
         IStmt stmt = new PrintStmt(new ValueExp(new IntValue(10)));
 
         stmt.execute(state);
@@ -49,7 +49,7 @@ class StmtTest {
         //int a; a=true; print(a);
     @Test
     void testspecial() {
-        PrgState state = new PrgState(new MyStack<>(), new MyDictionary<>(), new Mylist<>(), new NopStmt());
+        PrgState state = PrgState.of(new NopStmt());
         state.getSymTable().put("a", new IntValue(0));
 
         IStmt invalidAssign = new AssignStmt("a", new ValueExp(new interpreter.model.value.BoolValue(true)));

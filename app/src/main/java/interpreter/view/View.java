@@ -39,7 +39,7 @@ public class View {
     }
 
     private void runProgram(IStmt stmt) {
-        PrgState prg = new PrgState(new MyStack<>(), new MyDictionary<>(), new Mylist<>(), stmt);
+        PrgState prg = PrgState.of(stmt);
         IRepository repo = new Repository(prg);
         Controller controller = new Controller(repo);
         try {
