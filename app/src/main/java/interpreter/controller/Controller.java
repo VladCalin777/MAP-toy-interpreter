@@ -8,10 +8,11 @@ import interpreter.repository.IRepository;
 
 public class Controller {
     private final IRepository repo;
-    private boolean displayFlag = true;
+    private boolean displayFlag;
 
-    public Controller(IRepository repo) {
+    public Controller(IRepository repo, boolean displayFlag) {
         this.repo = repo;
+        this.displayFlag= displayFlag;
     }
 
     public void setDisplayFlag(boolean flag) {
@@ -29,14 +30,17 @@ public class Controller {
 
     public void allStep() throws MyException {
         PrgState prg = repo.getCrtPrg();
-        if (displayFlag) {
-            System.out.println(prg);
-        }
+        repo.logPrgStateExec();
+        display(prg);
         while (!prg.getExeStack().isEmpty()) {
             oneStep(prg);
-            if (displayFlag) {
-                System.out.println(prg);
-            }
+            repo.logPrgStateExec();
+            display(prg);
+        }
+    }
+    private void display(PrgState prg) {
+        if (displayFlag) {
+            System.out.println(prg.toString());
         }
     }
 }

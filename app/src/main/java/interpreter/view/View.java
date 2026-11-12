@@ -1,4 +1,4 @@
-package interpreter.view;
+/*package interpreter.view;
 
 import interpreter.exceptions.*;
 import interpreter.model.PrgState;
@@ -106,3 +106,4 @@ public class View {
         );
     }
 }
+*/
