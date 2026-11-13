@@ -9,10 +9,14 @@ import interpreter.model.stmt.*;
 import interpreter.model.type.*;
 import interpreter.model.value.*;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class StmtTest {
+    @TempDir
+    Path dir;
 
     @Test
     void testVarDeclStmt() throws MyException {
@@ -61,5 +65,26 @@ class StmtTest {
 
         } catch (interpreter.exceptions.MyException e) {
         }
+    }
+    //int a; int b; bool c; a=1; b=2; c=a!=b; print(c);
+    @Test
+    void testRelationalNotEqualExp() throws Exception {
+        IStmt program = new CompStmt(new VarDeclStmt("a", new IntType()),
+                new CompStmt(new VarDeclStmt("b", new IntType()),
+                        new CompStmt(new VarDeclStmt("c", new BoolType()),
+                                new CompStmt(new AssignStmt("a", new ValueExp(new IntValue(1))),
+                                        new CompStmt(new AssignStmt("b", new ValueExp(new IntValue(2))),
+                                                new CompStmt(new AssignStmt("c", new RelExp(RelOp.NE, new VarExp("a"), new VarExp("b"))),
+                                                        new PrintStmt(new VarExp("c"))))))));
+
+        PrgState state = PrgState.of(program);
+
+        var repo = new interpreter.repository.Repository(state, dir.resolve("log_relational_test.txt").toString());
+        var controller = new interpreter.controller.Controller(repo, false);
+
+        controller.allStep();
+
+        assertEquals(1, state.getOut().toList().size(), "Lista Out ar trebui să conțină exact un element.");
+        assertEquals(new BoolValue(true), state.getOut().toList().get(0), "Rezultatul lui 1 != 2 ar trebui să fie true.");
     }
 }
