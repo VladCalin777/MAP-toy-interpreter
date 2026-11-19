@@ -17,10 +17,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class RelExpTest {
+class RelationalExpTest {
 
     @Test
-    void testStringDefaultAndEquality() {
+    void stringDefaultValueIsEmptyAndEqualityWorks() {
         assertEquals(new StringValue(""), new StringType().defaultValue());
 
         StringValue s1 = new StringValue("test.in");
@@ -30,28 +30,45 @@ class RelExpTest {
     }
 
     @Test
-    void testRelationalOperators() throws MyException {
+    void relationalOperatorsEvaluateTrueAndFalse() throws MyException {
         IDictionary<String, IValue> sym = new MyDictionary<>();
         IExp five = new ValueExp(new IntValue(5));
         IExp seven = new ValueExp(new IntValue(7));
 
+        // LT (<)
         assertEquals(new BoolValue(true), new RelExp(RelOp.LT, five, seven).eval(sym));
         assertEquals(new BoolValue(false), new RelExp(RelOp.LT, seven, five).eval(sym));
+
+        // LE (<=)
         assertEquals(new BoolValue(true), new RelExp(RelOp.LE, five, five).eval(sym));
+        assertEquals(new BoolValue(false), new RelExp(RelOp.LE, seven, five).eval(sym));
+
+        // EQ (==)
         assertEquals(new BoolValue(true), new RelExp(RelOp.EQ, five, five).eval(sym));
         assertEquals(new BoolValue(false), new RelExp(RelOp.EQ, five, seven).eval(sym));
+
+        // NE (!=)
         assertEquals(new BoolValue(true), new RelExp(RelOp.NE, five, seven).eval(sym));
+        assertEquals(new BoolValue(false), new RelExp(RelOp.NE, five, five).eval(sym));
+
+        // GT (>)
         assertEquals(new BoolValue(true), new RelExp(RelOp.GT, seven, five).eval(sym));
+        assertEquals(new BoolValue(false), new RelExp(RelOp.GT, five, seven).eval(sym));
+
+        // GE (>=)
         assertEquals(new BoolValue(true), new RelExp(RelOp.GE, seven, seven).eval(sym));
+        assertEquals(new BoolValue(false), new RelExp(RelOp.GE, five, seven).eval(sym));
     }
 
     @Test
-    void testNonIntegerOperandThrows() {
+    void nonIntegerOperandThrowsExpressionException() {
         IDictionary<String, IValue> sym = new MyDictionary<>();
-        IExp str = new ValueExp(new StringValue("abc"));
-        IExp num = new ValueExp(new IntValue(5));
+        IExp strExp = new ValueExp(new StringValue("abc"));
+        IExp intExp = new ValueExp(new IntValue(5));
 
-        assertThrows(ExpressionException.class, () -> new RelExp(RelOp.LT, str, num).eval(sym));
-        assertThrows(ExpressionException.class, () -> new RelExp(RelOp.EQ, num, str).eval(sym));
+        assertThrows(ExpressionException.class,
+                () -> new RelExp(RelOp.LT, strExp, intExp).eval(sym));
+        assertThrows(ExpressionException.class,
+                () -> new RelExp(RelOp.EQ, intExp, strExp).eval(sym));
     }
 }

@@ -19,83 +19,93 @@ import java.nio.file.Path;
 import static org.junit.jupiter.api.Assertions.*;
 
 class FileStmtTest {
+
     @TempDir
     Path dir;
 
     private PrgState state;
-    private ValueExp file;
+    private StringValue fileKey;
+    private ValueExp fileExp;
 
     @BeforeEach
     void setup() throws Exception {
         Path f = dir.resolve("numbers.in");
-        Files.writeString(f, "7\n");
-        file = new ValueExp(new StringValue(f.toString()));
+        Files.writeString(f, "15\n50\n");
+        fileKey = new StringValue(f.toString());
+        fileExp = new ValueExp(fileKey);
+
         state = PrgState.of(new NopStmt());
         new VarDeclStmt("x", new IntType()).execute(state);
     }
 
     @Test
-    void openReadAndCloseWorkInSequence() throws MyException {
-        new OpenRFileStmt(file).execute(state);
-        assertTrue(state.getFileTable().isDefined(new StringValue(file.val().toString().replace("\"", ""))));
+    void openAddsToFileTableReadReadsInOrderAndZeroAtEndCloseRemovesIt() throws MyException {
+        // openRFile
+        new OpenRFileStmt(fileExp).execute(state);
+        assertTrue(state.getFileTable().isDefined(fileKey));
 
-        new ReadFileStmt(file, "x").execute(state);
-        assertEquals(new IntValue(7), state.getSymTable().lookup("x"));
+        // readFile -> 15, apoi 50, apoi 0 la EOF
+        new ReadFileStmt(fileExp, "x").execute(state);
+        assertEquals(new IntValue(15), state.getSymTable().lookup("x"));
 
-        // La sfârșitul fișierului trebuie să întoarcă 0
-        new ReadFileStmt(file, "x").execute(state);
+        new ReadFileStmt(fileExp, "x").execute(state);
+        assertEquals(new IntValue(50), state.getSymTable().lookup("x"));
+
+        new ReadFileStmt(fileExp, "x").execute(state);
         assertEquals(new IntValue(0), state.getSymTable().lookup("x"));
 
-        new ClosedRFileStmt(file).execute(state);
-        assertTrue(state.getFileTable().toMap().isEmpty());
+        // closeRFile
+        new ClosedRFileStmt(fileExp).execute(state);
+        assertFalse(state.getFileTable().isDefined(fileKey));
     }
 
     @Test
     void openErrorsThrowStatementException() throws MyException {
-        // Expresie care nu este string
+        // expresie care nu e string
         assertThrows(StatementException.class,
-                () -> new OpenRFileStmt(new ValueExp(new IntValue(5))).execute(state));
+                () -> new OpenRFileStmt(new ValueExp(new IntValue(10))).execute(state));
 
-        // Fișier inexistent
-        ValueExp missing = new ValueExp(new StringValue(dir.resolve("absent.in").toString()));
+        // fișier inexistent
+        ValueExp missing = new ValueExp(new StringValue(dir.resolve("missing.in").toString()));
         assertThrows(StatementException.class,
                 () -> new OpenRFileStmt(missing).execute(state));
 
-        // Fișier deschis de două ori
-        new OpenRFileStmt(file).execute(state);
+        // fișier deja deschis
+        new OpenRFileStmt(fileExp).execute(state);
         assertThrows(StatementException.class,
-                () -> new OpenRFileStmt(file).execute(state));
+                () -> new OpenRFileStmt(fileExp).execute(state));
     }
 
     @Test
     void readErrorsThrowStatementException() throws Exception {
-        // Fișierul nu este deschis încă
+        // fișierul nu este în FileTable
         assertThrows(StatementException.class,
-                () -> new ReadFileStmt(file, "x").execute(state));
+                () -> new ReadFileStmt(fileExp, "x").execute(state));
 
-        new OpenRFileStmt(file).execute(state);
+        new OpenRFileStmt(fileExp).execute(state);
 
-        // Variabilă nedeclarată
+        // variabilă nedeclarată
         assertThrows(StatementException.class,
-                () -> new ReadFileStmt(file, "inexistenta").execute(state));
+                () -> new ReadFileStmt(fileExp, "undeclared").execute(state));
 
-        // Variabilă care nu este int
+        // variabilă care nu e de tip int
         new VarDeclStmt("flag", new BoolType()).execute(state);
         assertThrows(StatementException.class,
-                () -> new ReadFileStmt(file, "flag").execute(state));
+                () -> new ReadFileStmt(fileExp, "flag").execute(state));
 
-        // Linie care nu conține un număr întreg
-        Path badFile = dir.resolve("bad.in");
-        Files.writeString(badFile, "salut\n");
-        ValueExp badExp = new ValueExp(new StringValue(badFile.toString()));
+        // linie care nu este număr întreg
+        Path badPath = dir.resolve("invalid.in");
+        Files.writeString(badPath, "not_an_int\n");
+        ValueExp badExp = new ValueExp(new StringValue(badPath.toString()));
         new OpenRFileStmt(badExp).execute(state);
+
         assertThrows(StatementException.class,
                 () -> new ReadFileStmt(badExp, "x").execute(state));
     }
 
     @Test
-    void closeUnopenedFileThrows() {
+    void closeUnopenedFileThrowsStatementException() {
         assertThrows(StatementException.class,
-                () -> new ClosedRFileStmt(file).execute(state));
+                () -> new ClosedRFileStmt(fileExp).execute(state));
     }
 }

@@ -50,6 +50,10 @@ class StmtTest {
         assertEquals(1, state.getOut().size());
         assertEquals(new IntValue(10), state.getOut().get(0));
     }
+
+
+
+
         //int a; a=true; print(a);
     @Test
     void testspecial() {
